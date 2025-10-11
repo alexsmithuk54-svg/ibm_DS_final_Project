@@ -58,23 +58,25 @@ app.layout = html.Div(children=[
     html.Div(dcc.Graph(id='success-payload-scatter-chart')),
 ])
 
-# TASK 2: Callback for pie chart
+# TASK 2: Callback for pie chart - CORRECTED VERSION
 @app.callback(
     Output(component_id='success-pie-chart', component_property='figure'),
     Input(component_id='site-dropdown', component_property='value')
 )
 def get_pie_chart(entered_site):
     if entered_site == 'ALL':
-        # For all sites, show overall success rate
+        # For all sites, show success count by launch site
+        # Filter only successful launches (class = 1) and count by launch site
+        success_by_site = spacex_df[spacex_df['class'] == 1]['Launch Site'].value_counts()
+        
         fig = px.pie(
-            spacex_df, 
-            names='class',
-            title='Overall Launch Success Rate (All Sites)',
-            color='class',
-            color_discrete_map={0: 'red', 1: 'green'}
+            names=success_by_site.index,
+            values=success_by_site.values,
+            title='Total Success Launches by Site',
+            color=success_by_site.index
         )
     else:
-        # For specific site, filter data
+        # For specific site, show success vs failure for that site
         filtered_df = spacex_df[spacex_df['Launch Site'] == entered_site]
         fig = px.pie(
             filtered_df, 
